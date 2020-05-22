@@ -2,8 +2,9 @@
   "name": "boot",
   "version": "0.7.0",
   "description": "Aurelia 2 plugins to make it more like Spring Framework and Spring Boot",
-  "main": "index.ts",
   "repository": "git@github.com:aurelia-plugin-boot/boot.git",
   "author": "Caleb Cushing <xenoterracide@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "private": true,
+  "workspaces": ["propertysource"]
 }
