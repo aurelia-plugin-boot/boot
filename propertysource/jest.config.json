@@ -1,0 +1,9 @@
+{
+  "verbose": true,
+  "rootDir": "test",
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "transform": {
+    "\\.ts$": ["ts-jest"]
+  }
+}

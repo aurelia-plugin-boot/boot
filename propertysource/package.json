@@ -8,5 +8,9 @@
   "license": "MIT",
   "dependencies": {
     "@aurelia/kernel": "^0.8.0-dev.202005200307"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.3",
+    "jest": "^26.0.1"
   }
 }
