@@ -6,6 +6,7 @@ import {
   IRegistration,
   IResolver,
   Resolved,
+  Injectable,
 } from '@aurelia/kernel';
 import { Environment } from './environment';
 
@@ -24,6 +25,12 @@ export class EnvironmentResolver implements IResolver, IRegistration {
   }
 }
 
-export function value<T extends string>(target: T): Function {
+export function value<T extends string>(
+  target: T
+): (
+  target: Injectable<Record<string, unknown>>,
+  key?: string | number | undefined,
+  descriptor?: number | PropertyDescriptor | undefined
+) => void {
   return DI.inject(new EnvironmentResolver(target));
 }
