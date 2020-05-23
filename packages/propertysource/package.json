@@ -1,5 +1,5 @@
 {
-  "name": "propertysource",
+  "name": "@aurelia-plugin-boot/propertysource",
   "version": "0.0.0",
   "description": "Spring Core and Spring Boot Property Source support for 12 Factor Configuration",
   "main": "index.ts",
