@@ -1,7 +1,7 @@
-import { constantCase } from 'constant-case';
-import { readFile } from 'fs';
-import { JSONPath } from 'jsonpath-plus';
-import { DI } from '@aurelia/kernel';
+import { constantCase } from "constant-case";
+import { readFile } from "fs";
+import { JSONPath } from "jsonpath-plus";
+import { DI } from "@aurelia/kernel";
 
 type Value = undefined | unknown;
 type TypedValue<T> = undefined | T;
@@ -37,6 +37,10 @@ export interface PropertySource<T = unknown> {
   get(key: string): unknown | undefined;
 }
 
+export interface FileLoader {
+  load(uri: URL): PropertySource;
+}
+
 export interface EnumerablePropertySource<T> extends PropertySource<T> {
   keys(): Iterable<string>;
 }
@@ -57,25 +61,16 @@ export class StandardEnvironment implements Environment {
     this.propertySources = propertySources;
   }
   get(key: string): unknown;
-  get<T>(
-    key: string,
-    converter: (value: unknown | undefined) => T
-  ): T | undefined;
-  get<T = unknown>(
-    key: string,
-    converter?: (value: unknown | undefined) => T
-  ): T | unknown | undefined {
+  get<T>(key: string, converter: (value: unknown | undefined) => T): T | undefined;
+  get<T = unknown>(key: string, converter?: (value: unknown | undefined) => T): T | unknown | undefined {
     const conv = converter ?? ((value: unknown): unknown => value);
     return conv(this.propertySources.find((ps) => ps.has(key))?.get(key));
   }
-  getAsync<T>(
-    key: string,
-    converter?: ((value: unknown) => T) | undefined
-  ): Promise<T | undefined> {
-    throw new Error('Method not implemented.');
+  getAsync<T>(key: string, converter?: ((value: unknown) => T) | undefined): Promise<T | undefined> {
+    throw new Error("Method not implemented.");
   }
   has(key: string): boolean {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   async hasAsync(key: string): Promise<boolean> {
@@ -83,26 +78,21 @@ export class StandardEnvironment implements Environment {
   }
 
   getActiveProfiles(): Profiles[] {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
   acceptsProfiles(profiles: Profiles): boolean {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 }
 
-export class ImmutablePropertySources extends Array<PropertySource>
-  implements PropertySources {
+export class ImmutablePropertySources extends Array<PropertySource> implements PropertySources {
   readonly myMap: Map<string, PropertySource>;
   constructor(...propertySources: PropertySource[]) {
     super();
     this.push(...propertySources);
     this.myMap = new Map(propertySources.map((ps) => [ps.name, ps]));
     if (this.length !== this.myMap.size) {
-      throw new Error(
-        `you should not have duplicate named property sources ${this.map(
-          (p) => p.name
-        )}`
-      );
+      throw new Error(`you should not have duplicate named property sources ${this.map((p) => p.name)}`);
     }
   }
   async loadAll(keys: string[]): Promise<unknown> {
@@ -117,8 +107,7 @@ export class ImmutablePropertySources extends Array<PropertySource>
   }
 }
 
-export class MapPropertySource<T = unknown>
-  implements EnumerablePropertySource<Map<string, T>> {
+export class MapPropertySource<T = unknown> implements EnumerablePropertySource<Map<string, T>> {
   constructor(readonly name: string, readonly source: Map<string, T>) {}
 
   async load(): Promise<void> {
@@ -227,8 +216,7 @@ export class ObjectFilePropertySource extends ObjectPropertySource {
     });
   }
 }
-export class ProcessEnvironmentPropertySource
-  implements EnumerablePropertySource<KVSource<string>> {
+export class ProcessEnvironmentPropertySource implements EnumerablePropertySource<KVSource<string>> {
   constructor(readonly name: string, readonly source: KVSource<string>) {}
   async hasAsync(key: string): Promise<boolean> {
     return this.has(key);
@@ -250,9 +238,11 @@ export class ProcessEnvironmentPropertySource
   }
 }
 
-export const RequiredProperties = DI.createInterface<Array<string>>(
-  'RequiredProperties'
-).noDefault();
-export const Environment = DI.createInterface<Environment>(
-  'Environment'
-).noDefault();
+export const RequiredProperties = DI.createInterface<Array<string>>("RequiredProperties").noDefault();
+export const Environment = DI.createInterface<Environment>("Environment").withDefault((b) => {
+  return b.cachedCallback(() => {
+    return new StandardEnvironment(
+      new ImmutablePropertySources(new ProcessEnvironmentPropertySource("ENV", process.env))
+    );
+  });
+});

@@ -1,5 +1,5 @@
 {
-  "name": "boot",
+  "name": "aurelia-plugin-boot",
   "version": "0.7.0",
   "description": "Aurelia 2 plugins to make it more like Spring Framework and Spring Boot",
   "repository": "git@github.com:aurelia-plugin-boot/boot.git",
