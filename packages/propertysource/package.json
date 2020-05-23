@@ -6,6 +6,9 @@
   "repository": "https://github.com/aurelia-plugin-boot/boot",
   "author": "Caleb Cushing <xenoterracide@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "test": "jest --collect-coverage"
+  },
   "dependencies": {
     "@aurelia/kernel": "^0.8.0-dev.202005200307",
     "change-case": "^4.1.1",

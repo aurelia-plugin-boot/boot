@@ -8,10 +8,26 @@
     "plugin:@typescript-eslint/recommended",
     "prettier/@typescript-eslint"
   ],
-  "rules": { "prettier/prettier": "warn" },
   "env": {
     "es6": true,
-    "node": true,
-    "mocha": true
-  }
+    "node": true
+  },
+  "rules": {
+    "prettier/prettier": ["warn"],
+    "import/no-default-export": ["error"],
+    "max-lines": ["error"],
+    "max-lines-per-function": [
+      "error",
+      { "max": 30, "skipComments": true, "skipBlankLines": true }
+    ]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts"],
+      "rules": {
+        "max-lines-per-function": ["off"],
+        "@typescript-eslint/no-non-null-assertion": ["off"]
+      }
+    }
+  ]
 }

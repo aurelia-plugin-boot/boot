@@ -3,13 +3,6 @@ import { readFile } from 'fs';
 import { JSONPath } from 'jsonpath-plus';
 import { DI } from '@aurelia/kernel';
 
-export const RequiredProperties = DI.createInterface<Array<string>>(
-  'RequiredProperties'
-).noDefault();
-export const Environment = DI.createInterface<Environment>(
-  'Environment'
-).noDefault();
-
 type Value = undefined | unknown;
 type TypedValue<T> = undefined | T;
 type Converter<T> = (value: Value) => T;
@@ -256,3 +249,10 @@ export class ProcessEnvironmentPropertySource
     return this.source[constantCase(key)];
   }
 }
+
+export const RequiredProperties = DI.createInterface<Array<string>>(
+  'RequiredProperties'
+).noDefault();
+export const Environment = DI.createInterface<Environment>(
+  'Environment'
+).noDefault();
