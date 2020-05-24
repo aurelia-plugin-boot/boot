@@ -2,18 +2,16 @@ import { constantCase } from "constant-case";
 import { readFile } from "fs";
 import { JSONPath } from "jsonpath-plus";
 import { DI } from "@aurelia/kernel";
+import * as dotenv from "dotenv";
+import * as fs from "fs";
+import { URL } from "url";
 
 type Value = undefined | unknown;
 type TypedValue<T> = undefined | T;
 type Converter<T> = (value: Value) => T;
 
 export interface Environment extends PropertyResolver {
-  getActiveProfiles(): Profiles[];
-  acceptsProfiles(profiles: Profiles): boolean;
-}
-
-export interface Profiles {
-  matches(activeProfiles: (profile: string) => boolean): boolean;
+  acceptsProfiles(matcher: (profile: string) => boolean): boolean;
 }
 
 export interface PropertyResolver {
@@ -37,10 +35,6 @@ export interface PropertySource<T = unknown> {
   get(key: string): unknown | undefined;
 }
 
-export interface FileLoader {
-  load(uri: URL): PropertySource;
-}
-
 export interface EnumerablePropertySource<T> extends PropertySource<T> {
   keys(): Iterable<string>;
 }
@@ -56,10 +50,8 @@ export interface PropertySources extends Array<PropertySource> {
 }
 
 export class StandardEnvironment implements Environment {
-  readonly propertySources: PropertySources;
-  constructor(propertySources: PropertySources) {
-    this.propertySources = propertySources;
-  }
+  constructor(private readonly activeProfiles: string[], readonly propertySources: PropertySources) {}
+
   get(key: string): unknown;
   get<T>(key: string, converter: (value: unknown | undefined) => T): T | undefined;
   get<T = unknown>(key: string, converter?: (value: unknown | undefined) => T): T | unknown | undefined {
@@ -74,14 +66,11 @@ export class StandardEnvironment implements Environment {
   }
 
   async hasAsync(key: string): Promise<boolean> {
-    return this.propertySources.some(async (ps) => await ps.has(key));
+    return this.propertySources.some(async (ps) => ps.has(key));
   }
 
-  getActiveProfiles(): Profiles[] {
-    throw new Error("Method not implemented.");
-  }
-  acceptsProfiles(profiles: Profiles): boolean {
-    throw new Error("Method not implemented.");
+  acceptsProfiles(matcher: (profile: string) => boolean): boolean {
+    return this.activeProfiles.some(matcher);
   }
 }
 
@@ -238,11 +227,21 @@ export class ProcessEnvironmentPropertySource implements EnumerablePropertySourc
   }
 }
 
+function dotEnvToKVSource(data: Buffer): KVSource {
+  return dotenv.parse(data);
+}
+
+export const PropertySource = {
+  env: (): PropertySource => new ProcessEnvironmentPropertySource("ENV", process.env),
+  dotEnv: (profile: string): PropertySource => {
+    const filename = `.env${profile ? "." + profile : ""}`;
+    return new ObjectFilePropertySource(filename, dotEnvToKVSource);
+  },
+};
+
 export const RequiredProperties = DI.createInterface<Array<string>>("RequiredProperties").noDefault();
 export const Environment = DI.createInterface<Environment>("Environment").withDefault((b) => {
   return b.cachedCallback(() => {
-    return new StandardEnvironment(
-      new ImmutablePropertySources(new ProcessEnvironmentPropertySource("ENV", process.env))
-    );
+    return new StandardEnvironment([], new ImmutablePropertySources(PropertySource.env()));
   });
 });

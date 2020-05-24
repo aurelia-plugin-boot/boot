@@ -16,10 +16,8 @@
     "prettier/prettier": ["warn"],
     "import/no-default-export": ["error"],
     "max-lines": ["error"],
-    "max-lines-per-function": [
-      "error",
-      { "max": 30, "skipComments": true, "skipBlankLines": true }
-    ]
+    "max-lines-per-function": ["error", { "max": 30, "skipComments": true, "skipBlankLines": true }],
+    "explicit-module-boundary-types": ["warn", { "allowTypedFunctionExpressions": true }]
   },
   "overrides": [
     {
